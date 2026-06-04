@@ -1,0 +1,28 @@
+// دالة فحص الباسورد وعرض محتويات الصفحة السرية بالمللي
+function verifyAndReveal() {
+    const passInput = document.getElementById('passInput').value;
+    const authBox = document.getElementById('authBox');
+    const surpriseZone = document.getElementById('surpriseZone');
+
+    // تم تعديل الباسورد بالملي بناءً على طلبك إلى 232020
+    if(passInput.trim() === "232020") {
+        // إخفاء صندوق الباسورد بنعومة سينمائية
+        gsap.to(authBox, {opacity: 0, duration: 0.4, onComplete: () => {
+            authBox.style.display = 'none';
+            
+            // إظهار المحتوى الفخم بتأثير زمني متتابع
+            surpriseZone.style.display = 'flex';
+            gsap.to(surpriseZone, {opacity: 1, duration: 0.8});
+            
+            gsap.from('.letter-card, .envelope-3d-card, .counter-luxury-card, .nested-card', {
+                y: 40,
+                opacity: 0,
+                stagger: 0.1,
+                duration: 0.6,
+                ease: "power2.out"
+            });
+        }});
+    } else {
+        alert("كلمة السر غير صحيحة، حاولي مرة أخرى يا أمي المحبوبة! ❤️");
+    }
+}
