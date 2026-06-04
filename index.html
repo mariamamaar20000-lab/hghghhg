@@ -1,28 +1,530 @@
-// دالة فحص الباسورد وعرض محتويات الصفحة السرية بالمللي
-function verifyAndReveal() {
-    const passInput = document.getElementById('passInput').value;
-    const authBox = document.getElementById('authBox');
-    const surpriseZone = document.getElementById('surpriseZone');
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>أجمل أم في الدنيا - مريم</title>
+    
+    <!-- استدعاء خطوط Google Fonts الفاخرة والأنيميشن الاحترافي GSAP -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@1,400;1,700&family=Cairo:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 
-    // تم تعديل الباسورد بالملي بناءً على طلبك إلى 232020
-    if(passInput.trim() === "232020") {
-        // إخفاء صندوق الباسورد بنعومة سينمائية
-        gsap.to(authBox, {opacity: 0, duration: 0.4, onComplete: () => {
-            authBox.style.display = 'none';
-            
-            // إظهار المحتوى الفخم بتأثير زمني متتابع
-            surpriseZone.style.display = 'flex';
-            gsap.to(surpriseZone, {opacity: 1, duration: 0.8});
-            
-            gsap.from('.letter-card, .envelope-3d-card, .counter-luxury-card, .nested-card', {
-                y: 40,
-                opacity: 0,
-                stagger: 0.1,
-                duration: 0.6,
-                ease: "power2.out"
-            });
-        }});
-    } else {
-        alert("كلمة السر غير صحيحة، حاولي مرة أخرى يا أمي المحبوبة! ❤️");
-    }
-}
+    <style>
+        :root {
+            --neon-pink: #ff2a85;
+            --neon-purple: #b5179e;
+            --deep-velvet: #080006;
+            --glass-card: rgba(22, 3, 17, 0.75);
+            --border-glow: rgba(255, 42, 133, 0.35);
+            --text-neon-glow: 0 0 8px rgba(255, 42, 133, 0.6), 0 0 20px rgba(181, 23, 158, 0.4);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        body {
+            background-color: var(--deep-velvet);
+            background-image: 
+                radial-gradient(circle at 50% 10%, rgba(181, 23, 158, 0.35) 0%, transparent 50%),
+                radial-gradient(circle at 50% 80%, rgba(255, 42, 133, 0.15) 0%, transparent 60%);
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+            position: relative;
+            padding: 40px 20px;
+        }
+
+        /* جزيئات القلوب المتطايرة الفخمة في الخلفية */
+        .ambient-canvas {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .main-wrapper {
+            width: 100%;
+            max-width: 880px;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        /* هيدر الترحيب الفخم بالتاج والمشابه للصورة 475445_2.png بالملي */
+        .welcome-header {
+            text-align: center;
+            position: relative;
+            margin-top: 20px;
+        }
+        .welcome-title {
+            font-size: 20px;
+            color: #ffb703;
+            letter-spacing: 6px;
+            font-weight: 900;
+            text-shadow: 0 0 10px rgba(255,183,3,0.5);
+            margin-bottom: 5px;
+        }
+        .mom-name {
+            font-size: 90px;
+            font-weight: 900;
+            color: #ffffff;
+            line-height: 1;
+            text-shadow: 0 0 15px var(--neon-pink), 0 0 35px var(--neon-purple), 0 0 50px rgba(255,255,255,0.6);
+            position: relative;
+            display: inline-block;
+            margin: 15px 0;
+        }
+        .mom-name::before {
+            content: '👑';
+            position: absolute;
+            top: -55px;
+            left: 50%;
+            transform: translateX(-50%) scale(1.3);
+            filter: drop-shadow(0 0 12px var(--neon-pink));
+        }
+        .sub-caption {
+            font-size: 20px;
+            color: #ffffff;
+            opacity: 0.95;
+            text-shadow: var(--text-neon-glow);
+        }
+
+        /* شريط الـ 100% المتوهج والمتحرك */
+        .progress-track {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            height: 24px;
+            border-radius: 50px;
+            border: 1px solid var(--border-glow);
+            padding: 3px;
+            box-shadow: inset 0 0 12px rgba(0,0,0,0.9), 0 0 20px rgba(255, 42, 133, 0.15);
+            overflow: hidden;
+        }
+        .progress-bar {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--neon-purple), var(--neon-pink), #ff758c);
+            border-radius: 50px;
+            box-shadow: 0 0 18px var(--neon-pink);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            color: #fff;
+            transition: width 0.04s linear;
+        }
+
+        /* كارت طلب الرقم السري النيون الفاخر */
+        .gate-card {
+            background: var(--glass-card);
+            border: 1px solid var(--border-glow);
+            border-radius: 20px;
+            padding: 45px 25px;
+            text-align: center;
+            backdrop-filter: blur(25px);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5), 0 0 30px rgba(255, 42, 133, 0.15);
+            transition: transform 0.2s;
+        }
+        .gate-card h2 {
+            font-size: 22px;
+            margin-bottom: 25px;
+            text-shadow: var(--text-neon-glow);
+        }
+        .input-glow-style {
+            width: 100%;
+            max-width: 360px;
+            padding: 16px;
+            background: rgba(10, 2, 8, 0.9);
+            border: 1px solid var(--neon-pink);
+            border-radius: 50px;
+            color: #fff;
+            font-size: 24px;
+            text-align: center;
+            letter-spacing: 6px;
+            outline: none;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.9), 0 0 15px rgba(255, 42, 133, 0.2);
+            margin-bottom: 25px;
+            transition: 0.3s;
+        }
+        .input-glow-style:focus {
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.9), 0 0 30px var(--neon-pink);
+            border-color: #fff;
+        }
+        .unlock-luxury-btn {
+            background: linear-gradient(90deg, #d81159, #ff2a85, #ffb703);
+            background-size: 200% auto;
+            color: #fff;
+            border: none;
+            padding: 14px 55px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 0 25px var(--neon-pink);
+            transition: 0.3s;
+        }
+        .unlock-luxury-btn:hover {
+            transform: scale(1.05);
+            background-position: right center;
+            box-shadow: 0 0 35px var(--neon-pink);
+        }
+
+        /* ================= حاوية المفاجأة الكبرى (مخفية وتفتح بالباسورد 232020) ================= */
+        .reveal-container {
+            display: none;
+            flex-direction: column;
+            gap: 30px;
+            opacity: 0;
+        }
+
+        /* كروت العرض العلوي (الرسالة والظرف الهدية) */
+        .hero-twin-layout {
+            display: grid;
+            grid-template-columns: 1.7fr 1.3fr;
+            gap: 25px;
+        }
+        @media (max-width: 768px) { .hero-twin-layout { grid-template-columns: 1fr; } }
+
+        .letter-luxury-box {
+            background: var(--glass-card);
+            border: 1px solid var(--border-glow);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(25px);
+            display: flex;
+            align-items: center;
+            gap: 25px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+        }
+        .mom-profile-avatar {
+            width: 140px;
+            height: 195px;
+            border-radius: 15px;
+            border: 2px solid var(--neon-pink);
+            box-shadow: 0 0 25px var(--neon-pink);
+            object-fit: cover;
+            background: #1a0212;
+        }
+        .letter-text-side h3 {
+            font-size: 26px;
+            color: #ffffff;
+            margin-bottom: 12px;
+            text-shadow: var(--text-neon-glow);
+        }
+        .letter-text-side p {
+            font-size: 16px;
+            line-height: 1.8;
+            color: #f7eaff;
+        }
+
+        .gift-envelope-3d {
+            background: linear-gradient(135deg, #560bad, #b5179e, #ff2a85);
+            border-radius: 20px;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.3);
+            box-shadow: 0 20px 45px rgba(255, 42, 133, 0.35);
+            cursor: pointer;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .gift-envelope-3d:hover { transform: translateY(-8px) rotate(1deg); }
+        .env-icon { font-size: 48px; margin-bottom: 15px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3)); }
+        .env-inner-msg {
+            font-family: 'Amiri', serif;
+            font-size: 18px;
+            font-weight: bold;
+            line-height: 1.8;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.5);
+        }
+
+        /* كارت العداد الزمني الفخم الدائري والأرقام المضيئة */
+        .time-counter-luxury {
+            background: var(--glass-card);
+            border: 1px solid var(--border-glow);
+            border-radius: 20px;
+            padding: 35px 25px;
+            text-align: center;
+            backdrop-filter: blur(25px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+        }
+        .time-counter-luxury h4 {
+            font-size: 22px;
+            color: var(--neon-pink);
+            text-shadow: var(--text-neon-glow);
+            margin-bottom: 25px;
+        }
+        .grid-four-slots {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+        .slot-box {
+            background: rgba(12, 1, 10, 0.9);
+            border: 1px solid rgba(255, 42, 133, 0.35);
+            border-radius: 16px;
+            padding: 22px 10px;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.95), 0 5px 15px rgba(0,0,0,0.6);
+            position: relative;
+        }
+        .slot-box::after {
+            content: ''; position: absolute; left: 0; top: 50%; width: 100%; height: 1px;
+            background: rgba(255, 255, 255, 0.04);
+        }
+        .slot-value {
+            font-size: 42px;
+            font-weight: 900;
+            color: #ffffff;
+            text-shadow: 0 0 18px var(--neon-pink);
+        }
+        .slot-lbl { font-size: 13px; color: #ccbecd; margin-top: 8px; font-weight: bold; }
+
+        /* الأربعة كروت الزجاجية العلوية للعبارات والكلمات المضيئة */
+        .quad-features-layout {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+        @media (max-width: 768px) { .quad-features-layout { grid-template-columns: repeat(2, 1fr); } }
+
+        .glass-mini-card {
+            background: var(--glass-card);
+            border: 1px solid var(--border-glow);
+            border-radius: 16px;
+            padding: 25px 15px;
+            text-align: center;
+            backdrop-filter: blur(25px);
+            transition: 0.3s;
+        }
+        .glass-mini-card:hover {
+            border-color: var(--neon-pink);
+            transform: scale(1.04);
+            box-shadow: 0 0 25px rgba(255, 42, 133, 0.25);
+        }
+        .mini-icon { font-size: 30px; margin-bottom: 12px; display: inline-block; filter: drop-shadow(0 0 6px var(--neon-pink)); }
+        .mini-desc { font-size: 14px; line-height: 1.7; color: #f5e9f6; }
+
+        /* معرض ألبوم الصور السلايدر الدائري الفخم */
+        .moments-showcase-card {
+            background: var(--glass-card);
+            border: 1px solid var(--border-glow);
+            border-radius: 20px;
+            padding: 25px;
+            backdrop-filter: blur(25px);
+        }
+        .showcase-header-title {
+            color: var(--neon-pink);
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-shadow: var(--text-neon-glow);
+        }
+        .slider-scroll-tray {
+            display: flex;
+            gap: 15px;
+            overflow-x: auto;
+            padding-bottom: 12px;
+            scroll-behavior: smooth;
+        }
+        .slider-scroll-tray::-webkit-scrollbar { height: 6px; }
+        .slider-scroll-tray::-webkit-scrollbar-thumb { background: var(--neon-pink); border-radius: 10px; }
+        .premium-slider-img {
+            min-width: 140px;
+            height: 140px;
+            border-radius: 16px;
+            border: 2px solid rgba(255,255,255,0.1);
+            object-fit: cover;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.6);
+            transition: 0.3s;
+        }
+        .premium-slider-img:hover { border-color: var(--neon-pink); transform: scale(1.06); }
+
+        /* مشغل الموسيقى وتعديلات العرض الكلي الفاخر بالأسفل بالملي */
+        .bottom-tools-layout {
+            display: grid;
+            grid-template-columns: 1.6fr 1.4fr;
+            gap: 25px;
+        }
+        @media (max-width: 768px) { .bottom-tools-layout { grid-template-columns: 1fr; } }
+
+        .audio-luxury-player {
+            background: var(--glass-card);
+            border: 1px solid var(--border-glow);
+            border-radius: 20px;
+            padding: 25px;
+            backdrop-filter: blur(25px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .eq-bars-frame {
+            height: 35px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 5px;
+            margin-bottom: 20px;
+        }
+        .eq-single-bar {
+            width: 4px;
+            height: 10px;
+            background: linear-gradient(to top, var(--neon-purple), var(--neon-pink));
+            border-radius: 2px;
+            animation: audioPulse 0.6s ease infinite alternate;
+        }
+        .eq-single-bar:nth-child(2n) { animation-duration: 0.3s; }
+        .eq-single-bar:nth-child(3n) { animation-duration: 0.5s; }
+        @keyframes audioPulse { 0% { height: 6px; } 100% { height: 35px; } }
+
+        .player-control-deck {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(0,0,0,0.6);
+            padding: 12px 25px;
+            border-radius: 50px;
+            border: 1px solid rgba(255, 42, 133, 0.2);
+        }
+        .deck-time { font-size: 13px; color: #ccbecd; font-family: monospace; }
+        .deck-btns { display: flex; gap: 22px; font-size: 20px; cursor: pointer; user-select: none; }
+
+        .surprise-action-endbox {
+            background: linear-gradient(135deg, rgba(46, 2, 28, 0.95), rgba(12, 1, 10, 0.95));
+            border: 1px solid var(--neon-pink);
+            border-radius: 20px;
+            padding: 25px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 30px rgba(255, 42, 133, 0.15);
+        }
+        .end-action-btn {
+            background: var(--neon-pink);
+            color: #fff;
+            border: none;
+            padding: 14px 50px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 0 25px var(--neon-pink);
+            transition: 0.3s;
+        }
+        .end-action-btn:hover { box-shadow: 0 0 40px var(--neon-pink); transform: scale(1.05); }
+
+        .footer-glowing-ribbon {
+            text-align: center;
+            font-size: 22px;
+            font-weight: 900;
+            color: var(--neon-pink);
+            text-shadow: var(--text-neon-glow);
+            margin-top: 10px;
+            letter-spacing: 1px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- كانفاس الإضاءة والقلوب اللامعة المتطايرة بالخلفية لدعم تأثير الـ Wow الفخم -->
+<canvas class="ambient-canvas" id="canvasParticles"></canvas>
+
+<div class="main-wrapper">
+    <!-- هيدر العنوان والتاج العلوي الفخم بالملي -->
+    <div class="welcome-header">
+        <div class="welcome-title">WELCOME</div>
+        <h1 class="mom-name">مريم</h1>
+        <div class="sub-caption">أجمل أم في الدنيا ❤️</div>
+    </div>
+
+    <!-- شريط تحميل المفاجأة التلقائي النيون -->
+    <div class="progress-track">
+        <div class="progress-bar" id="loadBarFill">0%</div>
+    </div>
+
+    <!-- كارت الأمان وطلب الباسورد المطور لتأثير الفخامة الكريستالية -->
+    <div class="gate-card" id="gateAuthBox">
+        <h2>🔒 جاهزة للمفاجأة؟</h2>
+        <p style="color: #d8cbd9; font-size: 14px; margin-bottom: 20px;">ادخلي الباسورد لفتح المفاجأة بالملي</p>
+        <input type="password" class="input-glow-style" id="secretPassField" placeholder="•••••••••••••">
+        <br>
+        <button class="unlock-luxury-btn" onclick="executeVerification()">افتحي المفاجأة 🎁</button>
+    </div>
+
+    <!-- ================= الحاوية السرية الساحرة الكبرى (المغلقة بالباسورد الجديد 232020) ================= -->
+    <div class="reveal-container" id="grandRevealZone">
+        
+        <!-- قسم كارت الرسالة والظرف الهديّة ثلاثي الأبعاد المجاور له -->
+        <div class="hero-twin-layout">
+            <div class="letter-luxury-box">
+                <!-- يمكنك تغيير رابط الصورة برابط صورة الأم حقيقية مباشرة هنا -->
+                <img src="https://via.placeholder.com/140x195/ff2a85/ffffff?text=Mom" class="mom-profile-avatar" alt="Mom Profile">
+                <div class="letter-text-side">
+                    <h3>بحبك يا أغلى ما عندي ❤️</h3>
+                    <p>وجودك في حياتنا راحة ونعمة كبيرة من ربنا.. وكل لحظة معاكي فيها حب ودفا وضحكة حلوة مبتنطفيش أبداً وبنسعد بيها دايماً ✨💖</p>
+                </div>
+            </div>
+
+            <div class="gift-envelope-3d">
+                <div class="env-icon">💝</div>
+                <div class="env-inner-msg">
+                    وجودك في حياتنا نعمة<br>ربنا يخليكي لينا دايماً يا أحلى ماما في الدنيا 🎈
+                </div>
+            </div>
+        </div>
+
+        <!-- كارت العداد الزمني المحفور بأرقامه الرقمية النيون الفاخرة بالملي -->
+        <div class="time-counter-luxury">
+            <h4>💗 من يوم ما الدنيا نورت بيكي</h4>
+            <div class="grid-four-slots">
+                <div class="slot-box"><div class="slot-value">41</div><div class="slot-lbl">سنة</div></div>
+                <div class="slot-box"><div class="slot-value">0</div><div class="slot-lbl">شهر</div></div>
+                <div class="slot-box"><div class="slot-value">12</div><div class="slot-lbl">يوم</div></div>
+                <div class="slot-box"><div class="slot-value">15</div><div class="slot-lbl">ساعة</div></div>
+            </div>
+            <p style="font-size: 13px; color: #ff2a85; margin-top: 20px; font-weight: bold;">🗓️ من تاريخ ميلادك 3 / 12 / 1988</p>
+        </div>
+
+        <!-- شبكة الكروت الأربعة الزجاجية المضيئة المقتبسة من الصورة -->
+        <div class="quad-features-layout">
+            <div class="glass-mini-card">
+                <span class="mini-icon">💖</span>
+                <div class="mini-desc">وجودك في حياتنا نعمة كبيرة من ربنا ✨</div>
+            </div>
+            <div class="glass-mini-card">
+                <span class="mini-icon">😊</span>
+                <div class="mini-desc">ضحكتك بتطمن القلب وبتفرح البيت كله 🥰</div>
+            </div>
+            <div class="glass-mini-card">
+                <span class="mini-icon">👥</span>
+                <div class="mini-desc">مش حماتي وبس.. أنتي أمي وصحبتي وأختي 💕</div>
+            </div>
+            <div class="glass-mini-card">
+                <span class="mini-icon">🤲</span>
+                <div class="mini-desc">ربنا يخليكي لينا ويفرح قلبك دايماً بكل خير</div>
+            </div>
+        </div>
+
+        <!-- ألبوم لحظات صور العائلة التمريري المحكم -->
+        <div class="moments-showcase-card">
+            <div class="showcase-header-title">📸 أجمل لحظاتنا سوا ✨</div>
+            <div class="slider-scroll-tray">
+                <img src="https://via.placeholder.com/140/ff2a85/ffffff?text=1" class="premium-slider-img">
+                <img src="https://via.placeholder.com/140/b5179e/ffffff?text=2" class="premium-slider-img">
+                <img src="https://via.placeholder.com/140/7209b7/ffffff?text=3" class="premium-slider-img">
+                <img src="https://via.placeholder.com/140/ff2a85/ffffff?text=4" class="
